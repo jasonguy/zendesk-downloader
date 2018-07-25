@@ -1,4 +1,6 @@
 import inspect, logging, os, re, requests, subprocess
+# may need this for unicode stuff, install first with 'pip install unidecode'
+# import unidecode
 from pprint import pprint
 
 class Zendesk:
@@ -47,14 +49,13 @@ class Zendesk:
                 if "error" in result:
                     case_info['org_name'] = "None"
                 else:
+                    # If the org name is unicode, it is probably a good idea to use this:
+                    # org_name = unidecode.unidecode(org_name)
                     org_name = result['organization']['name']
-                    #print org_name
-                    # TODO: replace search and replace with regex pattern replace
-                    #pattern = re.compile['[ .,()\{\}[]!@#$%^&+*=~<>?]']
-                    #org_name = pattern.sub('', result['organization']['name'])
-                    for ch in [' ','.',',','(',')','!','@','#','$','%','^','&','*',';',':','?','<','>','=','{','}','[',']','/']:
-                        if ch in org_name:
-                            org_name=org_name.replace(ch,"")
+                    # regex pattern replace characters that will cause problems
+                    pattern = re.compile(r'[\ .,\'\`~\(\)\{\}\[\]!@#$%^&+*=~<>?\/\\]',flags=re.IGNORECASE)
+                    org_name = pattern.sub('', result['organization']['name'])
+                    print org_name
                     case_info['org_name'] = org_name
         return case_info
 
